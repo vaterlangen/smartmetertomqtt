@@ -31,6 +31,7 @@ public:
 private:
     QVariant m_lastValue;
     QString m_name;
+    quint64 m_lastTime;
 };
 
 

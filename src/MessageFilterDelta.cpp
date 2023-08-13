@@ -16,6 +16,7 @@
     along with SmartMeterToMqtt.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "MessageFilterDelta.hpp"
+#include <QDateTime>
 
 MessageFilterDelta::MessageFilterDelta() : m_lastValue(QVariant()), m_name(QString()){
 }
@@ -31,6 +32,7 @@ QString MessageFilterDelta::rename(QString name) {
 
 QVariant MessageFilterDelta::filter(QVariant value) {
     QVariant delta = QVariant();
+    quint64 time = QDateTime::currentMSecsSinceEpoch();
 
     if (value.canConvert<double>())
     {
@@ -39,10 +41,15 @@ QVariant MessageFilterDelta::filter(QVariant value) {
       if (!m_lastValue.isNull() && m_lastValue.canConvert<double>())
       {
         double old_val = m_lastValue.value<double>();
-        delta.setValue<double>(new_val - old_val);
+        double delta_d = new_val - old_val;
+        double delta_x = (time - this->m_lastTime) / 1000.0;
+        
+
+        delta.setValue<double>(delta_d / delta_x);
       }
 
-      m_lastValue.setValue<double>(new_val);
+      this->m_lastValue.setValue<double>(new_val);
+      this->m_lastTime = time;
     }
     
     return delta;
